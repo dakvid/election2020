@@ -1,0 +1,98 @@
+---
+title: "2020 NZ Election"
+output: 
+  flexdashboard::flex_dashboard:
+    vertical_layout: scroll
+    theme: spacelab
+    self_contained: false
+    css: https://fonts.googleapis.com/css?family=Open%20Sans
+    lib_dir: lib
+    mathjax: null
+    navbar:
+      - { title: "Intro", icon: "fa-home", align: left }
+      - { title: "Parties", icon: "ion-ios-settings-strong", href: "dumbbells.html", align: left }
+      - { title: "Refs", icon: "ion-ios-settings-strong", align: left }
+      - { title: "Hexmaps", icon: "ion-cube", href: "hexmaps.html", align: left }
+      - { title: "@dakvid", icon: "fa-twitter", href: "https://twitter.com/dakvid", align: right }
+    social: menu
+    source_code: https://github.com/dakvid/election2020
+---
+
+```{r init, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+## 
+
+### Welcome
+
+We just had [an election](https://en.wikipedia.org/wiki/New_Zealand_general_election,_2020) in New Zealand. Yay!
+I was going to sit this one out and enjoy everyone else's analysis, but there wasn't as much as I expected -
+especially good maps. Luckily I spent some time [visualising the 2017 election](https://david.frigge.nz/election2017/)
+and the code was relatively straightforward to adapt.
+
+Two caveats: first that these use provisional results from election night - I'll update with
+final results when those are released.
+Second, that around half of the electorates had boundary changes between 2017 and 2020, so
+comparisons of voting changes may be due in part to different populations.
+There's also a new electorate, which at least made the hexmaps more than simply re-running
+code with new numbers.
+
+Note that these pages are *desktop friendly*.
+They don't "fail" as such on mobile, but if you really want to poke about in the
+detail you'll fare better on a larger screen.
+
+David Friggens, October 2020
+
+### Hexmaps
+
+<p>
+<a href="hexmaps.html"><img width="49%" src="images/intro_hex_nat.png" /></a>
+<a href="hexmaps.html"><img width="49%" src="images/intro_hex_lab.png" /></a>
+</p>
+
+Geographical maps of results don't give a good representation of the spread of support
+various parties have. So here are some cartograms with one tile per electorate. You can
+see candidate race winners and vote concentration for the main parties.
+
+
+## 
+
+### Dumbbells: Parties
+
+<p>
+<a href="dumbbells.html"><img width="49%" src="images/intro_db_grn.png" /></a>
+<a href="dumbbells.html"><img width="49%" src="images/intro_db_nzf.png" /></a>
+</p>
+
+We know which parties gained and lost votes since 2017, but the national number doesn't
+tell the full story. Was there universal swing, or were there localised ups and
+downs? These dumbbell plots help make it clear, both for individual parties and
+the overall Left vs Right shift.
+
+<p><a href="dumbbells.html"><img width="100%" src="images/intro_db_lr.png" /></a></p>
+
+
+### Dumbbells: Referenda
+
+How variable was the support for the two referenda on the ballot this year?
+We'll find out when they release some results.
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-30013353-2', 'auto');
+  ga('send', 'pageview');
+
+</script>
+

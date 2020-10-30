@@ -1,0 +1,327 @@
+---
+title: "2020 NZ Election"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: spacelab
+    self_contained: false
+    css: https://fonts.googleapis.com/css?family=Open%20Sans
+    lib_dir: lib
+    mathjax: null
+    navbar:
+      - { title: "Intro", icon: "fa-home", href: "index.html", align: left }
+      - { title: "Parties", icon: "ion-ios-settings-strong", align: left }
+      - { title: "Refs", icon: "ion-ios-settings-strong", align: left }
+      - { title: "Hexmaps", icon: "ion-cube", href: "hexmaps.html", align: left }
+      - { title: "@dakvid", icon: "fa-twitter", href: "https://twitter.com/dakvid", align: right }
+    social: menu
+    source_code: https://github.com/dakvid/election2020
+editor_options: 
+  chunk_output_type: console
+---
+  
+  ```{r init, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r setup, include=FALSE}
+library(readr)
+library(dplyr)
+library(forcats)
+library(glue)
+library(stringr)
+library(plotly)
+
+GE2020 <- readRDS("data/GE2020_prelim.rds")
+GE2017 <- readRDS("data/GE2017.rds")
+electorates <- read_csv("data/electorates.csv")
+party_colours <- read_csv("data/party_colours.csv")
+
+GE2017 <- 
+  GE2017 %>% 
+  inner_join(
+    electorates %>% select(id, id_14),
+    by = "id_14"
+  ) %>% 
+  select(-id_14, -electorate_name_14)
+
+party_voters_2017 <-
+  GE2017 %>% 
+  filter(VotingType == "Party",
+         !str_detect(Party, "nformal")) %>% 
+  group_by(id) %>% 
+  summarise(Voters2017 = sum(Votes)) %>% 
+  ungroup()
+
+candidate_voters_2017 <-
+  GE2017 %>% 
+  filter(VotingType == "Candidate",
+         !str_detect(Candidate, "nformal")) %>% 
+  group_by(id) %>% 
+  summarise(Voters2017 = sum(Votes)) %>% 
+  ungroup()
+
+party_voters_2020 <-
+  GE2020 %>% 
+  filter(VotingType == "Party",
+         !str_detect(Party, "nformal")) %>% 
+  group_by(id) %>% 
+  summarise(Voters = sum(Votes)) %>% 
+  ungroup()
+
+candidate_voters_2020 <-
+  GE2020 %>% 
+  filter(VotingType == "Candidate",
+         !str_detect(Candidate, "nformal")) %>% 
+  group_by(id) %>% 
+  summarise(Voters = sum(Votes)) %>% 
+  ungroup()
+```
+
+
+# 
+
+```{r db_data}
+party_votes <-
+  GE2020 %>% 
+  filter(VotingType == "Party") %>% 
+  group_by(id, Party) %>% 
+  summarise(Votes = sum(Votes)) %>% 
+  ungroup() %>% 
+  inner_join(party_voters_2020, by = "id") %>% 
+  mutate(PerCent = round(Votes / Voters * 100, 2))
+
+party_votes_2017 <-
+  GE2017 %>% 
+  filter(VotingType == "Party") %>% 
+  group_by(id, Party) %>% 
+  summarise(Votes2017 = sum(Votes)) %>% 
+  ungroup() %>% 
+  inner_join(party_voters_2017, by = "id") %>% 
+  mutate(PerCent2017 = round(Votes2017 / Voters2017 * 100, 2))
+
+pv_change <-
+  party_votes %>% 
+  full_join(party_votes_2017,
+            by = c("id", "Party")) %>% 
+  inner_join(electorates, by = "id") %>% 
+  select(id,
+         Electorate = electorate_name,
+         Electorate14 = electorate_name_14,
+         boundary_change,
+         Party,
+         `2020` = PerCent,
+         `2017` = PerCent2017)
+```
+
+
+## Plots {.tabset}
+
+```{r db_fn}
+show_dumbbell <- function(db_party_name = NA_character_, round_up = TRUE) {
+
+  the_change <- 
+    pv_change %>% 
+    filter(Party == db_party_name)
+  if (round_up) {
+    the_change <- 
+      the_change %>% 
+      mutate(`2020` = round(`2020`, 1),
+             `2017` = round(`2017`, 1))
+  }
+  
+  the_change %>% 
+    mutate(Electorate = fct_reorder(Electorate, `2020`)) %>% 
+    inner_join(party_colours, by = "Party") %>% 
+    plot_ly(color = I("gray80")) %>% 
+    add_segments(
+      x = ~pmin(`2017`, `2020`), xend = ~pmax(`2017`, `2020`),
+      y = ~Electorate, yend = ~Electorate,
+      showlegend = FALSE
+    ) %>% 
+    add_markers(
+      x = ~`2017`, y = ~Electorate, name = "2017",
+      color = ~if_else(boundary_change, I("grey90"), I("grey60")),
+      hoverinfo = "text",
+      text = ~glue("{`2017`}% of {Electorate14} votes in 2017 {if_else(boundary_change, '<br><i>Boundary differs from 2020</i>', '')}")
+    ) %>% 
+    add_markers(
+      x = ~`2020`, y = ~Electorate, name = "2020",
+      color = ~I(party_colour),
+      hoverinfo = "text",
+      text = ~glue("{`2020`}% of {Electorate} votes in 2020 {if_else(is.na(`2017`), '<br><i>New electorate</i>', if_else(boundary_change, '<br><i>Boundary changed</i>', ''))}")
+    ) %>% 
+    layout(
+      title = glue("Relative Votes for the {db_party_name} by Electorate"),
+      xaxis = list(title = "Votes (Percent)"),
+      yaxis = list(title = "", dtick = 1),
+      margin = list(l = 130),
+      legend = list(x = 0.8, y = 0.1)
+    )
+}
+```
+
+### Labour
+
+```{r db_labour}
+show_dumbbell("Labour Party")
+```
+
+### National
+
+```{r db_national}
+show_dumbbell("National Party")
+```
+
+### Green
+
+```{r db_green}
+show_dumbbell("Green Party")
+```
+
+### ACT
+
+```{r db_act}
+show_dumbbell("ACT New Zealand")
+```
+
+### Māori
+
+```{r db_māori}
+show_dumbbell("Māori Party", round_up = FALSE)
+```
+
+### NZ First
+
+```{r db_nzf}
+show_dumbbell("New Zealand First Party")
+```
+
+### TOP
+
+```{r db_top}
+show_dumbbell("The Opportunities Party (TOP)", round_up = FALSE)
+```
+
+### Cannabis
+
+```{r db_aclp}
+show_dumbbell("Aotearoa Legalise Cannabis Party", round_up = FALSE)
+```
+
+### Left vs Right
+
+```{r db_left_right}
+pv_change_lr <-
+  pv_change %>% 
+  mutate(Group = 
+           case_when(Party %in% c("Labour Party", "Green Party", "Māori Party") ~ "Left",
+                     Party %in% c("National Party", "ACT New Zealand", "New Conservative", "Conservative") ~ "Right")) %>%
+  filter(!is.na(Group)) %>%
+  group_by(Group, Electorate, Electorate14, boundary_change) %>%
+  summarise(`2020` = sum(`2020`, na.rm = TRUE),
+            `2017` = sum(`2017`, na.rm = TRUE)) %>%
+  ungroup() %>% 
+  # deal with new electorate
+  mutate(`2020` = if_else(`2020` == 0, NA_real_, round(`2020`, 1)),
+         `2017` = if_else(`2017` == 0, NA_real_, round(`2017`, 1)))
+pv_change_lr <-
+  inner_join(
+    pv_change_lr %>% 
+      filter(Group == "Left") %>% 
+      select(Electorate, Electorate14, boundary_change, `Left 2020` = `2020`, `Left 2017` = `2017`),
+    pv_change_lr %>% 
+      filter(Group == "Right") %>% 
+      select(Electorate, Electorate14, boundary_change, `Right 2020` = `2020`, `Right 2017` = `2017`)
+  ) %>% 
+  mutate(Electorate = fct_reorder(Electorate, `Left 2020`))
+plot_ly(pv_change_lr, color = I("gray80")) %>% 
+  add_segments(
+    x = ~pmin(`Left 2017`, `Left 2020`), xend = ~pmax(`Left 2017`, `Left 2020`),
+    y = ~Electorate, yend = ~Electorate,
+    showlegend = FALSE
+  ) %>% 
+  add_segments(
+    x = ~pmin(`Right 2017`, `Right 2020`), xend = ~pmax(`Right 2017`, `Right 2020`),
+    y = ~Electorate, yend = ~Electorate,
+    showlegend = FALSE
+  ) %>% 
+  add_markers(
+    x = ~`Left 2017`, y = ~Electorate, name = "Left 2017",
+    color = ~if_else(boundary_change, I("grey90"), I("grey60")),
+    hoverinfo = "text",
+    text = ~glue("{`Left 2017`}% of {Electorate14} voted for Lab/Grn/Māo in 2017 {if_else(boundary_change, '<br><i>Boundary differs from 2020</i>', '')}")
+  ) %>% 
+  add_markers(
+    x = ~`Right 2017`, y = ~Electorate, name = "Right 2017",
+    color = ~if_else(boundary_change, I("grey90"), I("grey60")),
+    hoverinfo = "text",
+    text = ~glue("{`Right 2017`}% of {Electorate14} voted for Nat/ACT/Cons in 2017 {if_else(boundary_change, '<br><i>Boundary differs from 2020</i>', '')}")
+  ) %>% 
+  add_markers(
+    x = ~`Left 2020`, y = ~Electorate, name = "Left 2020",
+    color = I("red1"),
+    hoverinfo = "text",
+    text = ~glue("{`Left 2020`}% of {Electorate} voted for Lab/Grn/Māo in 2020 {if_else(is.na(`Left 2017`), '<br><i>New electorate</i>', if_else(boundary_change, '<br><i>Boundary changed</i>', ''))}")
+  ) %>% 
+  add_markers(
+    x = ~`Right 2020`, y = ~Electorate, name = "Right 2020",
+    color = I("blue1"),
+    hoverinfo = "text",
+    text = ~glue("{`Right 2020`}% of {Electorate} voted for Nat/ACT/NCons in 2020 {if_else(is.na(`Right 2017`), '<br><i>New electorate</i>', if_else(boundary_change, '<br><i>Boundary changed</i>', ''))}")
+  ) %>% 
+  layout(
+    title = '"Left" and "Right" Votes by Electorate',
+    xaxis = list(title = "Votes (Percent)", dtick = 10),
+    yaxis = list(title = "", dtick = 1),
+    margin = list(l = 130)
+  )
+```
+
+
+
+
+## Explanation {.sidebar}
+
+These dumbbell plots show the percent of the party vote received in each electorate,
+highlighting the shift from 2017, with the the caveat that there were boundary changes
+to around half of the electorates. Darker grey dots had the same boundaries and lighter
+grey have had changes.
+
+As the headlines have been shouting, Labour had universal increases and National had
+universal decreases.
+ACT too had universal increases (though it would have been hard to have gone down).
+
+The Greens had big increases in their strongholds and modest increases in most other places.
+I think the couple of notable decreases are due to boundary changes.
+
+The Māori Party overall went down, which is unsurprising after three years out of
+parliament. It is interesting to see that the Māori electorates saw both jumps and
+drops - notably with less support in Waiariki, which was their only candidate win.
+
+NZ First universally plummeted, being portrayed as Jacinda's "hand brake".
+TOP couldn't make as much of a splash as they did last time, with drops
+across the board.
+
+Would the cannabis referendum enthuse or dampen support for the Legalise Cannabis
+Party? Well they did see increases across the Māori electorates at least.
+
+Finally, how did the vote share change between "the Left" (Labour, Green and Māori)
+vs "the Right" (National, ACT, Conservative and New Conservative)?
+The nationwide shift left
+[begun in 2017](https://david.frigge.nz/election2017/dumbbells.html#left-vs-right)
+continues, with only 10 electorates remaining with a right-wing majority.
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-30013353-2', 'auto');
+  ga('send', 'pageview');
+
+</script>
