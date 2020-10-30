@@ -1,0 +1,73 @@
+id,abbr,electorate_name,id_14,boundary_change,electorate_name_14
+1,AUC,Auckland Central,1,F,Auckland Central
+2,BAN,Banks Peninsula,41,T,Port Hills
+3,BAY,Bay of Plenty,2,F,Bay of Plenty
+4,BOT,Botany,3,F,Botany
+5,CHC,Christchurch Central,4,F,Christchurch Central
+6,CHE,Christchurch East,5,T,Christchurch East
+7,COR,Coromandel,7,T,Coromandel
+8,DUN,Dunedin,8,T,Dunedin North
+9,EAS,East Coast,10,F,East Coast
+10,ECB,East Coast Bays,11,F,East Coast Bays
+11,EPS,Epsom,12,F,Epsom
+12,HAE,Hamilton East,13,F,Hamilton East
+13,HAW,Hamilton West,14,T,Hamilton West
+14,HUT,Hutt South,17,F,Hutt South
+15,ILA,Ilam,18,T,Ilam
+16,INV,Invercargill,19,T,Invercargill
+17,KAI,Kaikōura,20,F,Kaikōura
+18,KKM,Kaipara ki Mahurangi,15,T,Helensville
+19,KEL,Kelston,21,F,Kelston
+20,MAA,Mana,22,F,Mana
+21,MĀN,Māngere,23,F,Māngere
+22,MRW,Manurewa,25,T,Manurewa
+23,MAU,Maungakiekie,26,T,Maungakiekie
+24,MTA,Mt Albert,27,F,Mt Albert
+25,MTR,Mt Roskill,28,T,Mt Roskill
+26,NAP,Napier,29,F,Napier
+27,NEL,Nelson,30,F,Nelson
+28,NWL,New Lynn,31,T,New Lynn
+29,NWP,New Plymouth,32,F,New Plymouth
+30,NSH,North Shore,33,F,North Shore
+31,NCT,Northcote,34,F,Northcote
+32,NLD,Northland,35,T,Northland
+33,ŌHĀ,Ōhāriu,36,F,Ōhāriu
+34,ŌTA,Ōtaki,37,F,Ōtaki
+35,PAK,Pakuranga,38,F,Pakuranga
+36,PAL,Palmerston North,39,F,Palmerston North
+37,PAN,Panmure-Ōtāhuhu,24,T,Manukau East
+38,PAP,Papakura,40,T,Papakura
+39,POR,Port Waikato,16,T,Hunua
+40,RAT,Rangitata,42,T,Rangitata
+41,RAK,Rangitīkei,43,F,Rangitīkei
+42,REM,Remutaka,44,F,Rimutaka
+43,RON,Rongotai,46,F,Rongotai
+44,ROT,Rotorua,47,F,Rotorua
+45,SEL,Selwyn,48,T,Selwyn
+46,SOU,Southland,6,T,Clutha-Southland
+47,TAI,Taieri,9,T,Dunedin South
+48,TAK,Takanini,,,
+49,TĀM,Tāmaki,49,F,Tāmaki
+50,TAR,Taranaki-King Country,50,F,Taranaki-King Country
+51,TPŌ,Taupō,51,T,Taupō
+52,TRN,Tauranga,52,F,Tauranga
+53,TEA,Te Atatū,53,F,Te Atatū
+54,TUK,Tukituki,54,F,Tukituki
+55,UPP,Upper Harbour,55,T,Upper Harbour
+56,WAK,Waikato,56,T,Waikato
+57,WAM,Waimakariri,57,F,Waimakariri
+58,WAR,Wairarapa,58,F,Wairarapa
+59,WAT,Waitaki,59,T,Waitaki
+60,WEL,Wellington Central,60,F,Wellington Central
+61,WES,West Coast-Tasman,61,T,West Coast-Tasman
+62,WHN,Whanganui,62,F,Whanganui
+63,WHP,Whangaparāoa,45,T,Rodney
+64,WHR,Whangārei,63,T,Whangarei
+65,WIG,Wigram,64,T,Wigram
+66,HAU,Hauraki-Waikato,65,T,Hauraki-Waikato
+67,IKA,Ikaroa-Rāwhiti,66,T,Ikaroa-Rāwhiti
+68,TMK,Tāmaki Makaurau,67,T,Tāmaki Makaurau
+69,TTH,Te Tai Hauāuru,68,F,Te Tai Hauāuru
+70,TTK,Te Tai Tokerau,69,T,Te Tai Tokerau
+71,TTT,Te Tai Tonga,70,T,Te Tai Tonga
+72,WAI,Waiariki,71,F,Waiariki
