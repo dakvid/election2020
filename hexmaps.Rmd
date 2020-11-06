@@ -46,7 +46,7 @@ nzhex <-
   read_sf("data/nzhex.gpkg") %>% 
   st_transform(crs = "+proj=longlat +datum=WGS84")
 
-GE2020 <- readRDS("data/GE2020_prelim.rds")
+GE2020 <- readRDS("data/GE2020.rds")
 GE2017 <- readRDS("data/GE2017.rds")
 electorates <- read_csv("data/electorates.csv")
 party_colours <- read_csv("data/party_colours.csv")
@@ -310,7 +310,7 @@ leaflet(options = getLeafletOptions(5.8, 5.8)) %>%
     data = nzhex %>% 
       inner_join(party_votes %>% filter(Party == "Labour Party")),
     label = ~labeltext,
-    weight=2, color='#000000', group = 'Labour 49.1%',
+    weight=2, color='#000000', group = 'Labour 50.0%',
     fillOpacity = ~opa, opacity = 1, fillColor = ~party_colour,
     highlightOptions = highlightOptions(weight = 4)
   ) %>% 
@@ -318,15 +318,7 @@ leaflet(options = getLeafletOptions(5.8, 5.8)) %>%
     data = nzhex %>% 
       inner_join(party_votes %>% filter(Party == "National Party")),
     label = ~labeltext,
-    weight=2, color='#000000', group = 'National 26.8%',
-    fillOpacity = ~opa, opacity = 1, fillColor = ~party_colour,
-    highlightOptions = highlightOptions(weight = 4)
-  ) %>% 
-  addPolygons(
-    data = nzhex %>% 
-      inner_join(party_votes %>% filter(Party == "ACT New Zealand")),
-    label = ~labeltext,
-    weight=2, color='#000000', group = 'ACT 8.0%',
+    weight=2, color='#000000', group = 'National 25.6%',
     fillOpacity = ~opa, opacity = 1, fillColor = ~party_colour,
     highlightOptions = highlightOptions(weight = 4)
   ) %>% 
@@ -334,7 +326,15 @@ leaflet(options = getLeafletOptions(5.8, 5.8)) %>%
     data = nzhex %>% 
       inner_join(party_votes %>% filter(Party == "Green Party")),
     label = ~labeltext,
-    weight=2, color='#000000', group = 'Green 7.6%',
+    weight=2, color='#000000', group = 'Green 7.9%',
+    fillOpacity = ~opa, opacity = 1, fillColor = ~party_colour,
+    highlightOptions = highlightOptions(weight = 4)
+  ) %>% 
+  addPolygons(
+    data = nzhex %>% 
+      inner_join(party_votes %>% filter(Party == "ACT New Zealand")),
+    label = ~labeltext,
+    weight=2, color='#000000', group = 'ACT 7.6%',
     fillOpacity = ~opa, opacity = 1, fillColor = ~party_colour,
     highlightOptions = highlightOptions(weight = 4)
   ) %>% 
@@ -342,7 +342,7 @@ leaflet(options = getLeafletOptions(5.8, 5.8)) %>%
     data = nzhex %>% 
       inner_join(party_votes %>% filter(Party == "New Zealand First Party")),
     label = ~labeltext,
-    weight=2, color='#000000', group = 'NZ First 2.7%',
+    weight=2, color='#000000', group = 'NZ First 2.6%',
     fillOpacity = ~opa, opacity = 1, fillColor = ~party_colour,
     highlightOptions = highlightOptions(weight = 4)
   ) %>% 
@@ -350,7 +350,7 @@ leaflet(options = getLeafletOptions(5.8, 5.8)) %>%
     data = nzhex %>% 
       inner_join(party_votes %>% filter(Party == "Māori Party")),
     label = ~labeltext,
-    weight=2, color='#000000', group = 'Māori 1.0%',
+    weight=2, color='#000000', group = 'Māori 1.2%',
     fillOpacity = ~opa, opacity = 1, fillColor = ~party_colour,
     highlightOptions = highlightOptions(weight = 4)
   ) %>% 
@@ -362,8 +362,8 @@ leaflet(options = getLeafletOptions(5.8, 5.8)) %>%
       direction = "center")
   ) %>% 
   addLayersControl(
-    baseGroups = c("Labour 49.1%", "National 26.8%", "ACT 8.0%", "Green 7.6%",
-                   "NZ First 2.7%", "Māori 1.0%"),
+    baseGroups = c("Labour 50.0%", "National 25.6%", "Green 7.9%", "ACT 7.6%",
+                   "NZ First 2.6%", "Māori 1.2%"),
     options = layersControlOptions(collapsed = FALSE)
   ) %>% 
   onRender(

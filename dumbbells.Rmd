@@ -33,7 +33,7 @@ library(glue)
 library(stringr)
 library(plotly)
 
-GE2020 <- readRDS("data/GE2020_prelim.rds")
+GE2020 <- readRDS("data/GE2020.rds")
 GE2017 <- readRDS("data/GE2017.rds")
 electorates <- read_csv("data/electorates.csv")
 party_colours <- read_csv("data/party_colours.csv")
@@ -305,13 +305,14 @@ TOP couldn't make as much of a splash as they did last time, with drops
 across the board.
 
 Would the cannabis referendum enthuse or dampen support for the Legalise Cannabis
-Party? Well they did see increases across the Māori electorates at least.
+Party? They did indeed see a boost, most strikingly across the Māori electorates.
 
 Finally, how did the vote share change between "the Left" (Labour, Green and Māori)
 vs "the Right" (National, ACT, Conservative and New Conservative)?
 The nationwide shift left
 [begun in 2017](https://david.frigge.nz/election2017/dumbbells.html#left-vs-right)
-continues, with only 10 electorates remaining with a right-wing majority.
+continues, with only three electorates remaining with a right-wing majority,
+and a further eight with a right-wing plurality.
 
 
 
