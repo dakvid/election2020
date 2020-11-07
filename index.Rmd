@@ -11,7 +11,7 @@ output:
     navbar:
       - { title: "Intro", icon: "fa-home", align: left }
       - { title: "Parties", icon: "ion-ios-settings-strong", href: "dumbbells.html", align: left }
-      - { title: "Refs", icon: "ion-ios-settings-strong", align: left }
+      - { title: "Refs", icon: "ion-ios-settings-strong", href: "referenda.html", align: left }
       - { title: "Hexmaps", icon: "ion-cube", href: "hexmaps.html", align: left }
       - { title: "@dakvid", icon: "fa-twitter", href: "https://twitter.com/dakvid", align: right }
     social: menu
@@ -62,7 +62,7 @@ see candidate race winners and vote concentration for the main parties.
 
 ## 
 
-### Dumbbells: Parties
+### Dumbbells: Party Votes
 
 <p>
 <a href="dumbbells.html"><img width="49%" src="images/intro_db_grn.png" /></a>
@@ -77,10 +77,12 @@ the overall Left vs Right shift.
 <p><a href="dumbbells.html"><img width="100%" src="images/intro_db_lr.png" /></a></p>
 
 
-### Dumbbells: Referenda
+### Referenda Votes
 
 How variable was the support for the two referenda on the ballot this year?
-We'll find out when they release some results.
+We can compare with some dot and dumbbell plots.
+
+<p><a href="referenda.html"><img width="100%" src="images/intro_db_ref.png" /></a></p>
 
 
 <script>

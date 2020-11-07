@@ -1,0 +1,209 @@
+---
+title: "2020 NZ Election"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: spacelab
+    self_contained: false
+    css: https://fonts.googleapis.com/css?family=Open%20Sans
+    lib_dir: lib
+    mathjax: null
+    navbar:
+      - { title: "Intro", icon: "fa-home", href: "index.html", align: left }
+      - { title: "Parties", icon: "ion-ios-settings-strong", href: "dumbbells.html", align: left }
+      - { title: "Refs", icon: "ion-ios-settings-strong", align: left }
+      - { title: "Hexmaps", icon: "ion-cube", href: "hexmaps.html", align: left }
+      - { title: "@dakvid", icon: "fa-twitter", href: "https://twitter.com/dakvid", align: right }
+    social: menu
+    source_code: https://github.com/dakvid/election2020
+editor_options: 
+  chunk_output_type: console
+---
+  
+```{r init, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r setup, include=FALSE}
+library(magrittr)
+library(readxl)
+library(dplyr)
+library(forcats)
+library(glue)
+library(stringr)
+library(plotly)
+
+ordinary <- 
+  read_xlsx("data/ElectorateReferendumResults.xlsx",
+            sheet = "Ordinary Votes",
+            skip = 6) %>% 
+  set_names(c("id", "gm_name",
+              "euth_yes_ordinary", "euth_no_ordinary", "euth_inf_ordinary",
+              "canna_yes_ordinary", "canna_no_ordinary", "canna_inf_ordinary",
+              "total_ordinary")) %>% 
+  mutate(id = id %>% str_extract("^[^/]+") %>% as.numeric())
+
+special <- 
+  read_xlsx("data/ElectorateReferendumResults.xlsx",
+            sheet = "Special Votes",
+            skip = 5) %>% 
+  set_names(c("id", "electorate_name",
+              "euth_yes_special", "euth_no_special", "euth_inf_special",
+              "canna_yes_special", "canna_no_special", "canna_inf_special",
+              "total_special")) %>% 
+  mutate(id = as.numeric(id))
+
+total_votes <- 
+  add(
+    ordinary %>% 
+      pull(total_ordinary) %>% 
+      sum(),
+    special %>% 
+      pull(total_special) %>% 
+      sum()
+  )
+
+maori_specials_total <- 
+  special %>% 
+  anti_join(ordinary,
+            by = "id") %>% 
+  pull(total_special) %>% 
+  sum()
+
+maori_specials <- 
+  special %>% 
+  anti_join(ordinary,
+            by = "id") %>% 
+  mutate(id = 99,
+         electorate_name = "Māori special votes") %>% 
+  group_by(id, electorate_name) %>% 
+  summarise(euthenasia = sum(euth_yes_special),
+            cannabis = sum(canna_yes_special),
+            total = sum(total_special)) %>% 
+  ungroup() %>% 
+  transmute(id,
+            electorate_name,
+            euthenasia = round(100 * euthenasia / total, 1),
+            cannabis = round(100 * cannabis / total, 1),
+            difference = abs(euthenasia - cannabis))
+
+  electorate_votes <- 
+    ordinary %>% 
+    inner_join(special,
+               by = "id") %>% 
+    transmute(id,
+              electorate_name,
+              euthenasia = round(100 * (euth_yes_ordinary + euth_yes_special) / (total_ordinary + total_special), 1),
+              cannabis = round(100 * (canna_yes_ordinary + canna_yes_special) / (total_ordinary + total_special), 1),
+              difference = abs(euthenasia - cannabis))
+
+  referenda <- 
+    bind_rows(electorate_votes,
+              maori_specials) %>% 
+    mutate(electorate_name = if_else(is.na(id), "New Zealand", electorate_name),
+           id = if_else(is.na(id), 0, id),
+           c_compare = if_else(cannabis > euthenasia, "more", "fewer"),
+           e_compare = if_else(euthenasia > cannabis, "more", "fewer"))
+```
+
+
+# 
+
+
+## Plots {.tabset}
+
+### Cannabis
+
+```{r db_cannabis}
+referenda %>% 
+  mutate(electorate_name = fct_reorder(electorate_name, cannabis)) %>% 
+  plot_ly(color = I("gray80")) %>% 
+  add_markers(
+    x = ~cannabis, y = ~electorate_name, name = "cannabis",
+    color = I("green"),
+    hoverinfo = "text",
+    text = ~glue("{cannabis}% of {electorate_name} voters supported")
+  ) %>% 
+  layout(
+    title = glue("Cannabis Referendum Support by Electorate"),
+    xaxis = list(title = "Votes (Percent)"),
+    yaxis = list(title = "", dtick = 1),
+    margin = list(l = 130)
+  )
+```
+
+### Euthenasia
+
+```{r db_euthenasia}
+referenda %>% 
+  mutate(electorate_name = fct_reorder(electorate_name, euthenasia)) %>% 
+  plot_ly(color = I("gray80")) %>% 
+  add_markers(
+    x = ~euthenasia, y = ~electorate_name, name = "euthenasia",
+    color = I("gray10"),
+    hoverinfo = "text",
+    text = ~glue("{euthenasia}% of {electorate_name} voters supported")
+  ) %>% 
+  layout(
+    title = glue("Euthenasia Referendum Support by Electorate"),
+    xaxis = list(title = "Votes (Percent)"),
+    yaxis = list(title = "", dtick = 1),
+    margin = list(l = 130)
+  )
+```
+
+### Difference
+
+```{r db_difference}
+referenda %>% 
+  mutate(electorate_name = fct_reorder(electorate_name, difference)) %>% 
+  plot_ly(color = I("gray80")) %>% 
+    add_segments(
+      x = ~pmin(cannabis, euthenasia), xend = ~pmax(cannabis, euthenasia),
+      y = ~electorate_name, yend = ~electorate_name,
+      showlegend = FALSE
+    ) %>% 
+  add_markers(
+    x = ~euthenasia, y = ~electorate_name, name = "euthenasia",
+    color = I("gray10"),
+    hoverinfo = "text",
+    text = ~glue("{round(difference,1)}% {e_compare} voters supported euthenasia in {electorate_name}")
+  ) %>% 
+  add_markers(
+    x = ~cannabis, y = ~electorate_name, name = "cannabis",
+    color = I("green"),
+    hoverinfo = "text",
+    text = ~glue("{round(difference,1)}% {c_compare} voters supported cannabis in {electorate_name}")
+  ) %>% 
+  layout(
+    title = glue("Referenda Support Differences by Electorate"),
+    xaxis = list(title = "Votes (Percent)"),
+    yaxis = list(title = "", dtick = 1),
+    margin = list(l = 130)
+  )
+```
+
+
+## Explanation {.sidebar}
+
+This election contained two referenda, one to enact a law legalising euthenasia
+(in limited circumstances) and one to support a draft proposal to legalise cannabis.
+
+The euthenasia referendum passed comfortably with 
+`r referenda %>% filter(electorate_name == "New Zealand") %>% pull(euthenasia)`% support
+but the cannabis referendum narrowly failed with only
+`r referenda %>% filter(electorate_name == "New Zealand") %>% pull(cannabis)`% support.
+
+In each case the support varied by electorate - in the dot plots you can see the
+variation by electorate (and NZ) for both individually, 
+and in the dumbbell plot you can see the variation in the difference of support between them.
+
+Note that ordinary referenda results were not reported separately for the Māori electorates,
+only for the special votes. That's a bit frustrating as there were definitely different
+voting patterns, but there's not much we can do. I've combined the general electorate specials
+with the general/Māori vote numbers. For the Māori special votes I've combined them into a
+single entry - combined they only make
+`r round(100 * maori_specials_total / total_votes, 1)`%
+of the national vote.
+
